@@ -8,13 +8,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.icu.util.Measure;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -25,31 +22,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
-import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.opencsv.CSVWriter;
 
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class MeasureFirmness extends AppCompatActivity implements SensorEventListener {
 
@@ -61,7 +46,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
     private TextView currentAccText;
     private TextView currentForceText;
     private TextView maxForceText;
-    private int count;
+    private int settleCount;
     private int graphCount;
     private double beginTime;
     private double endTime;
@@ -99,7 +84,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
 
         checkPermissions();
 
-        count = 0;
+        settleCount = 0;
         previousValue = -1.0;
         maxAcc = -1.0;
         maxForce = -1.0;
@@ -219,12 +204,12 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                         // If there hasn't been much of a change with the last 20 data points,
                         // then the phone is done bouncing and its 'settle time' is set
                         if (change < 2.0){
-                            count++;
+                            settleCount++;
                         }
                         else
-                            count = 0;
+                            settleCount = 0;
 
-                        if (count == 20){
+                        if (settleCount == 20){
                             settleTime = Double.valueOf(currentTime);
 
                             Log.d("settletime", String.valueOf(settleTime));
@@ -333,7 +318,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
      * Returns an integer rating on a scale of 1-10; 1 being the firmest, 10 being the softest*/
     public void getFirmnessRating(){
 
-        int rating = 1;
+        double rating = 1.00;
         double freeFallDuration;
         double bounceDuration;
         double stoppageTime;
@@ -341,6 +326,8 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         double impactSpeed;
         double impactForce;
         double calculation;
+        double firmnessCalculation = 0;
+        double difference;
         String conversion;
 
         bounceDuration = getBounceDuration();
@@ -360,15 +347,60 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                 " | STOP TIME: " + String.valueOf(stoppageTime));
 
         // Determine the rating here
-        // Multiply the maxRange by 9.81 since maxRange is given in g's (1g = 9.81m/s^s)
-        // Divide the maximum capable acceleration range of the phone by the 10 rating scales
-        // Then divide the maximum detected change by that scale rating to acquire an integer rating 1-10
-        // 1 is firm, 10 is soft
-        calculation = maxChange / 8;
-        conversion = String.valueOf(calculation);
+        // If the maximum change is less than 20 m/s^2,
+        difference = Math.abs(maxAcc - maxChange);
+
+        if (maxChange < 10){
+            firmnessCalculation = (0.75 * maxAcc) - (2.50 * maxChange);
+        }
+        else if (maxChange < 20){
+            firmnessCalculation = (0.75 * maxAcc) - (2.00 * maxChange);
+        }
+        else if (maxChange > 40){
+            if (((0.75 * maxAcc) - maxChange) < 5)
+                firmnessCalculation = 75;
+            else{
+                firmnessCalculation = maxAcc - maxChange;
+
+                if (maxAcc > 80){
+                    firmnessCalculation = (1.15 * maxAcc) - maxChange;
+                }
+                else if (maxAcc > 90){
+                    firmnessCalculation = (1.25 * maxAcc) - maxChange;
+                }
+            }
+        }
+        else{
+            firmnessCalculation = maxAcc - maxChange;
+
+            if (maxAcc > 80){
+                firmnessCalculation = (1.15 * maxAcc) - maxChange;
+            }
+            else if (maxAcc > 90){
+                firmnessCalculation = (1.25 * maxAcc) - maxChange;
+            }
+        }
+
+        calculation = firmnessCalculation / 75;
+        calculation *= 10;
+
+        if (calculation > 3){
+            calculation *= 1.35;
+        }
 
         try {
+
+            rating = 10.0 - calculation;
+
+            if (rating < 1)
+                rating = 1;
+
+            if (rating > 10)
+                rating = 10;
+
+            conversion = String.valueOf(rating);
             rating = Integer.parseInt(conversion);
+
         }catch (NumberFormatException e){
             Log.d("RATING", String.valueOf(e));
         }
@@ -485,7 +517,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
             // Permission is not granted
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(MeasureFirmness.this,
-                    Manifest.permission.READ_CONTACTS)) {
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
@@ -493,7 +525,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
             else {
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(MeasureFirmness.this,
-                        new String[]{Manifest.permission.READ_CONTACTS},
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
 
                 // MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE is an
@@ -635,7 +667,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         measureFirmnessButton.setText("FIRMNESS RATING");
 
         // Reset variables
-        count = 0;
+        settleCount = 0;
         previousValue = -1.0;
         maxAcc = -1.0;
         maxForce = -1.0;
