@@ -239,7 +239,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
 
             // Create folder named 'BedFirmness' in users' phone to save files
             File outputPath = getPublicDocumentStorageDir("BedFirmness");
-            File outputFile = new File(outputPath, "export.csv");
+            File outputFile = new File(outputPath, "export_"+System.currentTimeMillis()+".csv");
 
             try{
                 // Check to see if file exists
