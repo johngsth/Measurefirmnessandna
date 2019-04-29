@@ -3,6 +3,7 @@ package com.example.ripudaman.measurefirmnessandwp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
@@ -11,7 +12,7 @@ import android.view.View;
 public class MainActivity extends AppCompatActivity {
 
     private Button button;
-    private Button button2, button4;
+    private Button button2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -20,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
         button = findViewById(R.id.button);
         button2 = findViewById(R.id.button2);
-        button4 = findViewById(R.id.button4);
+        FloatingActionButton button4 = (FloatingActionButton)findViewById(R.id.button4);
 
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v) {
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
                 goToFourthActivity();
             }
         });
+        button4.setImageResource(R.drawable.ic_base_info);
     }
 
     private void goToSecondActivity() {

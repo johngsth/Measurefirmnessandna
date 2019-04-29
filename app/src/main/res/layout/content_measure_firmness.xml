@@ -5,26 +5,142 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MeasureNoise"
-    tools:showIn="@layout/activity_measure_noise">
+    tools:context=".MeasureFirmness"
+    tools:showIn="@layout/activity_measure_firmness">
 
     <TextView
-        android:id="@+id/labelAcc"
+        android:id="@+id/current_acc_label"
+        android:text="Current Acceleration: "
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="MeasureNoise"
-        android:layout_centerInParent="true"
-        android:layout_above="@id/button3"
+        android:layout_toRightOf="@+id/fab"
+        android:layout_above="@id/max_acc_value"/>
+
+    <TextView
+        android:id="@+id/current_acc_value"
+        android:text="0.00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/max_acc_value"
+        android:layout_toRightOf="@id/circle_button"/>
+
+    <TextView
+        android:id="@+id/max_acc_label"
+        android:text="Max Acceleration: "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/fab"
+        android:layout_above="@id/current_force_label"
+        android:paddingBottom="10dp" />
+
+    <TextView
+        android:id="@+id/max_acc_value"
+        android:text="0.00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/current_force_value"
+        android:layout_toRightOf="@id/circle_button"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:id="@+id/current_force_label"
+        android:text="Current Force: "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/fab"
+        android:layout_above="@id/max_force_label"
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:id="@+id/current_force_value"
+        android:text="0.00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/circle_button"
+        android:layout_above="@+id/max_force_value"
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:id="@+id/max_force_label"
+        android:text="Maximum Force: "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/fab"
+        android:layout_above="@+id/circle_button"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:id="@+id/max_force_value"
+        android:text="0.00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/circle_button"
+        android:layout_above="@+id/circle_button"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/circle_button"
+        android:text="Firmness Rating"
+        android:textColor="#2B2B2B"
+        android:textSize="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/timer_text"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/circular_button"
+        android:padding="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:id="@+id/timer_text"
+        android:text="00:00:00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/pauseButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/pauseButton"
+        android:layout_above="@+id/graph"
+        android:text="Reset"
         />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/pauseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Record"
-        android:layout_centerInParent="true"
-        />
+        android:text="Pause"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/graph" />
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:text="Start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/graph"
+        android:layout_toLeftOf="@id/pauseButton"/>
 
 </RelativeLayout>

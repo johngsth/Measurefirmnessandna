@@ -1,47 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:context=".MainActivity">
+<?xml version="1.0" encoding="UTF-8"?>
 
-    <TextView
-        android:id="@+id/labelAcc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@id/button"
-        android:text="Measuring Bed Firmness and Noise Ambience" />
+    <RelativeLayout tools:context=".MainActivity" android:layout_height="fill_parent" android:layout_width="fill_parent" xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="5dp"
-        android:text="Bed Firmness"
-        android:textAlignment="center" />
+    <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Measuring Bed Firmness and Noise Ambience" android:layout_above="@id/button" android:layout_centerHorizontal="true" android:layout_marginBottom="10dp" android:id="@+id/labelAcc"/>
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:text="Noise Ambience"
-        android:textAlignment="center"/>
+    <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Bed Firmness" android:layout_marginBottom="5dp" android:id="@+id/button" android:textAlignment="center" android:layout_marginTop="10dp" android:layout_centerInParent="true"/>
 
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="5dp"
-        android:text="Info"
-        android:textAlignment="center" />
+    <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="Noise Ambience" android:layout_centerHorizontal="true" android:id="@+id/button2" android:textAlignment="center" android:layout_marginTop="5dp" android:layout_below="@id/button"/>
+
+    <android.support.design.widget.FloatingActionButton android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button4" android:layout_margin="16dp" android:layout_gravity="end|bottom"/>
 
 </RelativeLayout>

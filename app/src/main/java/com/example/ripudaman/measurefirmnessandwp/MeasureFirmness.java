@@ -39,6 +39,10 @@ import java.util.List;
 public class MeasureFirmness extends AppCompatActivity implements SensorEventListener {
 
     public static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 6;
+    private static final String PERMISSIONS = "PERMISSIONS";
+    private static final String FILESTORAGE = "FILESTORAGE";
+    private static final String FIRMNESSRATING = "FIRMNESSRATING";
+    private static final String ACCELEROMETER = "ACCELEROMETER";
 
     private SensorManager sensorManager;
     private TextView timerText;
@@ -187,12 +191,12 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                                 beginTime = Double.valueOf(currentTime);
                                 begin = false;
 
-                                Log.d("begintime", String.valueOf(beginTime));
+                                Log.d(FIRMNESSRATING, "Free fall begin time: " + String.valueOf(beginTime));
                             }
 
                             endTime = Double.valueOf(currentTime);
                             firstFreeFall = false;
-                            Log.d("endtime", String.valueOf(endTime));
+                            Log.d(FIRMNESSRATING, "Free fall end time: " + String.valueOf(endTime));
                         }
                     }
 
@@ -212,7 +216,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                         if (settleCount == 20){
                             settleTime = Double.valueOf(currentTime);
 
-                            Log.d("settletime", String.valueOf(settleTime));
+                            Log.d(FIRMNESSRATING, "Settle time: " + String.valueOf(settleTime));
                         }
                     }
                     else { // Set test values and button text when not recording data
@@ -222,7 +226,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                     previousValue = resultantVector;
 
                     // Live feed of y-coordinate accelerometer values printed to logcat with the tag "VALUESHERE"
-                    Log.d("VALUESHERE", String.valueOf(resultantVector));
+                    Log.d(ACCELEROMETER, "Current average acc: " + String.valueOf(resultantVector));
                 }
             }
         }
@@ -251,7 +255,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                     writer = new CSVWriter(new FileWriter(outputFile));
                 }
 
-                Log.d("FILEDEBUG", String.valueOf(outputFile));
+                Log.d(FILESTORAGE, "File path: " + String.valueOf(outputFile));
 
                 // Save data from list to csv file
                 writer.writeAll(accData);
@@ -262,7 +266,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
 
             }catch (Exception e){
                 e.printStackTrace();
-                Log.d("FILEDEBUG", String.valueOf(e));
+                Log.d(FILESTORAGE, "Error: " + String.valueOf(e));
                 toastIt("Save failed");
             }
         }
@@ -271,7 +275,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
             toastIt("No external storage available!");
         }
 
-        printList();
+        printAccList();
         printForceData();
     }
 
@@ -305,14 +309,6 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
     };
 
     /**
-     * Method for debugging the data list*/
-    public void printList(){
-        for (int i = 0; i < accData.size(); i++){
-            Log.d("PRINTLIST", Arrays.toString(accData.get(i)));
-        }
-    }
-
-    /**
      * Get mattress firmness rating
      * Called when the user presses pause or when the system stops recording automatically
      * Returns an integer rating on a scale of 1-10; 1 being the firmest, 10 being the softest*/
@@ -326,8 +322,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         double impactSpeed;
         double impactForce;
         double calculation;
-        double firmnessCalculation = 0;
-        double difference;
+        double firmnessCalculation;
         String conversion;
 
         bounceDuration = getBounceDuration();
@@ -337,7 +332,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         impactForce = calculateImpactForce(maxAcc);
         stoppageTime = endTime - maxAccTime;
 
-        Log.i("RATING", "MAX VALUE: " + String.valueOf(maxAcc) +
+        Log.i(FIRMNESSRATING, "MAX VALUE: " + String.valueOf(maxAcc) +
                 " | TIME OF PEAK: " + String.valueOf(maxAccTime) +
                 " | BOUNCE DURATION: " + String.valueOf(bounceDuration) +
                 " | FREE FALL DURATION: " + String.valueOf(freeFallDuration) +
@@ -348,7 +343,6 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
 
         // Determine the rating here
         // If the maximum change is less than 20 m/s^2,
-        difference = Math.abs(maxAcc - maxChange);
 
         if (maxChange < 10){
             firmnessCalculation = (0.75 * maxAcc) - (2.50 * maxChange);
@@ -388,21 +382,21 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
             calculation *= 1.35;
         }
 
-        try {
+        rating = 10.0 - calculation;
 
-            rating = 10.0 - calculation;
-
-            if (rating < 1)
+        if (rating < 1)
                 rating = 1;
 
-            if (rating > 10)
+        if (rating > 10)
                 rating = 10;
 
-            conversion = String.valueOf(rating);
-            rating = Integer.parseInt(conversion);
+        conversion = String.valueOf(rating);
 
-        }catch (NumberFormatException e){
-            Log.d("RATING", String.valueOf(e));
+        try {
+            rating = Integer.parseInt(conversion);
+        }
+        catch (Exception e){
+
         }
 
         // If not free fall was detected, then the user did not drop their phone and a rating cannot be calculated
@@ -421,7 +415,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
     public boolean freefallMonitor(double resultantVector){
 
         if (resultantVector < 2.0){
-            Log.d("FREEFALLING", "Free falling!");
+            Log.d(FIRMNESSRATING, "Free falling!");
 
             return true;
         }
@@ -496,8 +490,6 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
     public double getDynamicForce(double vector){
         double currentForce = 0.160 * vector;
 
-        //Log.d("DYNAMICFORCE", String.valueOf(currentForce));
-
         return currentForce;
     }
 
@@ -507,6 +499,14 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
     public void printForceData(){
         for (int i = 0; i < forceData.size(); i++){
             Log.d("FORCELIST", Arrays.toString(forceData.get(i)));
+        }
+    }
+
+    /**
+     * Method for debugging the data list*/
+    public void printAccList(){
+        for (int i = 0; i < accData.size(); i++){
+            Log.d("ACCLIST", Arrays.toString(accData.get(i)));
         }
     }
 
@@ -536,7 +536,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         else {
             // Permission already granted
 
-            Log.d("PERMISSIONS", "Permission already granted");
+            Log.d(PERMISSIONS, "Permission already granted");
         }
 
     }
@@ -578,7 +578,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         File file = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), fileName);
         if (!file.mkdirs()) {
-            Log.e("FILEDEBUG", "Directory not created");
+            Log.e(FILESTORAGE, "Directory not created");
         }
         return file;
     }
@@ -623,7 +623,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
                 impactDetected = true;
             }
 
-            Log.d("savedmax", String.valueOf(maxAcc) + " | " + String.valueOf(maxAccTime));
+            Log.d(FIRMNESSRATING, "Maximum Acceleration: " + String.valueOf(maxAcc) + " | Time: " + String.valueOf(maxAccTime));
         }
 
         // Save the maximum observed force
@@ -631,7 +631,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         {
             maxForce = force;
 
-            Log.d("MAXFORCE", String.valueOf(maxForce));
+            Log.d(FIRMNESSRATING, "Maximum Force: " + String.valueOf(maxForce));
         }
 
         // Save the maximum rate of change
@@ -639,7 +639,7 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
             if (freeFallDetected)
                 maxChange = change;
 
-            Log.d("MAXCHANGE", String.valueOf(maxChange));
+            Log.d(FIRMNESSRATING, "Maximum Change In Acc: " + String.valueOf(maxChange));
         }
     }
 
@@ -787,6 +787,9 @@ public class MeasureFirmness extends AppCompatActivity implements SensorEventLis
         graph.getViewport().setMaxX(15);
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMaxY(90.0);
+
+        // Display the legend.
+        graph.getLegendRenderer().setVisible(true);
     }
 
     public void graphData(){
